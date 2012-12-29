@@ -1,69 +1,69 @@
-#
-# This example is broken.
-#
-
 use io;
 
+producer_fn {
+  var tests = [1, 2, 3];
+  var i = 0;
+
+  #
+  # State 1: serve up tests
+  #
+  while i < tests.size() {
+    io.print("[producer] recv()");
+    match recv() {
+      [consumer, "ready"] {
+        io.print("[producer] send()");
+        consumer.send(["test", tests[i]]);
+        i = i + 1;
+      }
+      other {
+        io.print(str("[producer] unknown message: ", other));
+      }
+    }
+  }
+
+  #
+  # State 2: kill consumers
+  #
+  while true {
+    match recv() {
+      [consumer, "ready"] {
+        consumer.send("done");
+      }
+      "done" {
+        break;
+      }
+    }
+  }
+}
+
+consumer_fn {
+  var producer = recv();
+  while true {
+    io.print(str("[", self(), "] send('ready')"));
+    producer.send([self(), "ready"]);
+    io.print(str("[", self(), "] recv()"));
+    match recv() {
+      ["test", test] {
+        io.print(str("test ", test, " on consumer ", self()));
+      }
+      "done" {
+        break;
+      }
+      other {
+        io.print(str("[", self(), "] unknown message: ", other));
+      }
+    }
+  }
+  io.print("consumer is done");
+}
+
 main argv {
-  var producer = spawn {
-    var tests = [1, 2, 3];
-    var i = 0;
-
-    #
-    # State 1: serve up tests
-    #
-    while i < tests.size() {
-      io.print("[producer] recv()");
-      match recv() {
-        [consumer, "ready"] {
-          io.print("[producer] send()");
-          consumer.send(["test", tests[i]]);
-          i = i + 1;
-        }
-        other {
-          io.print(str("[producer] unknown message: ", other));
-        }
-      }
-    }
-
-    #
-    # State 2: kill consumers
-    #
-    while true {
-      match recv() {
-        [consumer, "ready"] {
-          consumer.send("done");
-        }
-        "done" {
-          break;
-        }
-      }
-    }
-  };
+  var producer = spawn(producer_fn);
 
   var consumers = [];
   var i = 0;
   while i < 2 {
-    consumers.push(spawn {
-      var producer = recv();
-      while true {
-        io.print(str("[", self(), "] send('ready')"));
-        producer.send([self(), "ready"]);
-        io.print(str("[", self(), "] recv()"));
-        match recv() {
-          ["test", test] {
-            io.print(str("test ", test, " on consumer ", self()));
-          }
-          "done" {
-            break;
-          }
-          other {
-            io.print(str("[", self(), "] unknown message: ", other));
-          }
-        }
-      }
-      io.print("consumer is done");
-    });
+    consumers.push(spawn(consumer_fn));
     i = i + 1;
   }
   consumers.each(fn { |c| c.send(producer); });

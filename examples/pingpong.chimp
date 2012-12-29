@@ -35,8 +35,8 @@ ping {
 }
 
 main argv {
-  var ponger = spawn { pong(); };
-  var pinger = spawn { ping(); };
+  var ponger = spawn(pong);
+  var pinger = spawn(ping);
   ponger.send(pinger);
   pinger.send(ponger);
   ponger.join();

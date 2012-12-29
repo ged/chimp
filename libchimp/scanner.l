@@ -46,7 +46,6 @@
 "fn"                        { CHIMP_TOKEN(TOK_FN) }
 "var"                       { CHIMP_TOKEN(TOK_VAR) }
 "not"                       { CHIMP_TOKEN(TOK_NOT) }
-"spawn"                     { CHIMP_TOKEN(TOK_SPAWN) }
 "match"                     { CHIMP_TOKEN(TOK_MATCH) }
 "class"                     { CHIMP_TOKEN(TOK_CLASS) }
 [ \t\r]                     { /* do nothing */ }

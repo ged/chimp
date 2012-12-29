@@ -14,9 +14,9 @@ fib n {
 main argv {
   io.print("Running fib(10), fib(20), fib(30) concurrently ...");
 
-  var f3 = spawn { recv().send(fib(30)); };
-  var f2 = spawn { recv().send(fib(20)); };
-  var f1 = spawn { recv().send(fib(10)); };
+  var f3 = spawn(fn { recv().send(fib(30)); });
+  var f2 = spawn(fn { recv().send(fib(20)); });
+  var f1 = spawn(fn { recv().send(fib(10)); });
 
   f1.send(self());
   f2.send(self());

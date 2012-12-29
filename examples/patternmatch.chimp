@@ -1,7 +1,7 @@
 use io;
 
 main argv {
-  var task = spawn {
+  var task = spawn(fn {
     while true {
       match recv() {
         ["say", msg] {
@@ -15,7 +15,7 @@ main argv {
         }
       }
     }
-  };
+  });
 
   task.send(["say", "Hello from another thread"]);
   task.send("asdkjaksd");

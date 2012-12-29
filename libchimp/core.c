@@ -247,6 +247,14 @@ _chimp_task_self (ChimpRef *self, ChimpRef *args)
     return chimp_task_get_self (CHIMP_CURRENT_TASK);
 }
 
+static ChimpRef *
+_chimp_task_spawn (ChimpRef *self, ChimpRef *args)
+{
+    ChimpRef *method = CHIMP_ARRAY_ITEM(args, 0);
+    /* TODO ensure method is not an instance method ... */
+    return chimp_task_new (method);
+}
+
 static ChimpTaskInternal *main_task = NULL;
 
 static chimp_bool_t
@@ -272,6 +280,7 @@ chimp_core_init_builtins (void)
 
     CHIMP_BUILTIN_METHOD(_chimp_task_recv, "recv");
     CHIMP_BUILTIN_METHOD(_chimp_task_self, "self");
+    CHIMP_BUILTIN_METHOD(_chimp_task_spawn, "spawn");
 
     return CHIMP_TRUE;
 }

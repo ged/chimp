@@ -502,27 +502,6 @@ chimp_vm_eval_frame (ChimpVM *vm, ChimpRef *frame)
             {
                 goto done;
             }
-            case CHIMP_OPCODE_SPAWN:
-            {
-                ChimpRef *task;
-                ChimpRef *target;
-
-                target = chimp_vm_pop (vm);
-                if (target == NULL) {
-                    return CHIMP_FALSE;
-                }
-                task = chimp_task_new (target);
-                if (task == NULL) {
-                    return CHIMP_FALSE;
-                }
-
-                if (!chimp_vm_push (vm, task)) {
-                    return CHIMP_FALSE;
-                }
-
-                pc++;
-                break;
-            }
             case CHIMP_OPCODE_DUP:
             {
                 ChimpRef *top = chimp_vm_top (vm);
