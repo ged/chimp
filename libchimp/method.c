@@ -97,6 +97,7 @@ chimp_method_new_closure (ChimpRef *method, ChimpRef *bindings)
     }
     CHIMP_METHOD_INIT(ref);
     CHIMP_METHOD(ref)->type = CHIMP_METHOD_TYPE_CLOSURE;
+    CHIMP_METHOD(ref)->flags = CHIMP_METHOD(method)->flags;
     CHIMP_METHOD(ref)->module = CHIMP_METHOD(method)->module;
     CHIMP_CLOSURE_METHOD(ref)->code = CHIMP_BYTECODE_METHOD(method)->code;
     CHIMP_CLOSURE_METHOD(ref)->bindings = bindings;

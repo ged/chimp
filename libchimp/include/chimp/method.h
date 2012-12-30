@@ -32,12 +32,17 @@ typedef enum _ChimpMethodType {
     CHIMP_METHOD_TYPE_CLOSURE
 } ChimpMethodType;
 
+enum {
+    CHIMP_METHOD_FLAG_FREEVARS = 0x0001 /* a closure with freevars */
+};
+
 typedef ChimpRef *(*ChimpNativeMethodFunc)(ChimpRef *, ChimpRef *);
 
 typedef struct _ChimpMethod {
     ChimpAny         base;
     ChimpRef        *self; /* NULL for unbound/function */
     ChimpMethodType  type;
+    int              flags;
     ChimpRef        *module;
     union {
         struct {

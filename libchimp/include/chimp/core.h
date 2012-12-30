@@ -49,6 +49,9 @@ chimp_bug (const char *filename, int lineno, const char *format, ...);
 chimp_bool_t
 chimp_is_builtin (struct _ChimpRef *name);
 
+chimp_bool_t
+chimp_get_builtin (struct _ChimpRef *name, struct _ChimpRef **value);
+
 #define CHIMP_BUG(fmt, ...) \
     chimp_bug (__FILE__, __LINE__, (fmt), ## __VA_ARGS__)
 

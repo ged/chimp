@@ -26,12 +26,14 @@ extern "C" {
 #endif
 
 enum {
-    CHIMP_SYM_DECL    = 0x0001, /* symbol explicitly introduced via a decl */
-    CHIMP_SYM_BUILTIN = 0x0002, /* builtin */
-    CHIMP_SYM_FREE    = 0x0004, /* free var */
-    CHIMP_SYM_MODULE  = 0x1000, /* symbol declared at the module level */
-    CHIMP_SYM_CLASS   = 0x2000, /* symbol declared at the class level */
-    CHIMP_SYM_FUNC    = 0x8000  /* symbol declared inside a function */
+    CHIMP_SYM_DECL     = 0x0001, /* symbol explicitly introduced via a decl */
+    CHIMP_SYM_BUILTIN  = 0x0002, /* builtin */
+    CHIMP_SYM_FREE     = 0x0004, /* free var, or closure with freevars */
+    CHIMP_SYM_CLOSURE  = 0x0008, /* closure */
+
+    CHIMP_SYM_MODULE   = 0x1000, /* symbol declared at the module level */
+    CHIMP_SYM_CLASS    = 0x2000, /* symbol declared at the class level */
+    CHIMP_SYM_FUNC     = 0x8000, /* symbol declared inside a function */
 };
 
 #define CHIMP_SYM_TYPE_MASK 0xf000

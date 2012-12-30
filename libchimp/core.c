@@ -251,6 +251,10 @@ static ChimpRef *
 _chimp_task_spawn (ChimpRef *self, ChimpRef *args)
 {
     ChimpRef *method = CHIMP_ARRAY_ITEM(args, 0);
+    if (CHIMP_METHOD(method)->flags & CHIMP_METHOD_FLAG_FREEVARS) {
+        CHIMP_BUG("spawn() cannot be called on a closure that uses freevars");
+        return NULL;
+    }
     /* TODO ensure method is not an instance method ... */
     return chimp_task_new (method);
 }
@@ -402,9 +406,15 @@ chimp_bug (const char *filename, int lineno, const char *format, ...)
 chimp_bool_t
 chimp_is_builtin (ChimpRef *name)
 {
+    return chimp_get_builtin (name, NULL);
+}
+
+chimp_bool_t
+chimp_get_builtin (struct _ChimpRef *name, ChimpRef **value)
+{
     int rc;
     
-    rc = chimp_hash_get (chimp_builtins, name, NULL);
+    rc = chimp_hash_get (chimp_builtins, name, value);
     if (rc < 0) {
         CHIMP_BUG ("could not determine if %s is a builtin",
                     CHIMP_STR_DATA(name));

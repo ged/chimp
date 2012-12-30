@@ -383,7 +383,21 @@ chimp_symtable_visit_expr_ident (ChimpRef *self, ChimpRef *expr)
             int type = CHIMP_SYMTABLE_ENTRY(ste)->flags &
                         CHIMP_SYM_TYPE_MASK;
             if (ste != CHIMP_SYMTABLE_GET_CURRENT_ENTRY(self)) {
-                return chimp_symtable_add (self, name, CHIMP_SYM_FREE | type);
+                ste = CHIMP_SYMTABLE_GET_CURRENT_ENTRY(self);
+                if (type == CHIMP_SYM_FUNC) {
+                    /* tag the current closure as using freevars */
+                    /* XXX we update flags of outer closures in _expr_fn ...
+                     *     should we do it here instead?
+                     */
+                    if (CHIMP_SYMTABLE_ENTRY(ste)->flags & CHIMP_SYM_CLOSURE) {
+                        CHIMP_SYMTABLE_ENTRY(ste)->flags |= CHIMP_SYM_FREE;
+                    }
+                    return chimp_symtable_add (self, name, CHIMP_SYM_FREE | type);
+                }
+                else if (type == CHIMP_SYM_MODULE) {
+                    /* module scope is (at least theoretically) immutable */
+                    return chimp_symtable_add (self, name, CHIMP_SYM_FREE | type);
+                }
             }
             return CHIMP_TRUE;
         }
@@ -416,10 +430,13 @@ chimp_symtable_visit_expr_binop (ChimpRef *self, ChimpRef *expr)
 static chimp_bool_t
 chimp_symtable_visit_expr_fn (ChimpRef *self, ChimpRef *expr)
 {
+    const int scope_flags = CHIMP_SYM_FUNC | CHIMP_SYM_CLOSURE;
     ChimpRef *args = CHIMP_AST_EXPR(expr)->fn.args;
     ChimpRef *body = CHIMP_AST_EXPR(expr)->fn.body;
+    ChimpRef *ste;
+    int freevars;
 
-    if (!chimp_symtable_enter_scope (self, expr, CHIMP_SYM_FUNC)) {
+    if (!chimp_symtable_enter_scope (self, expr, scope_flags)) {
         return CHIMP_FALSE;
     }
 
@@ -431,8 +448,35 @@ chimp_symtable_visit_expr_fn (ChimpRef *self, ChimpRef *expr)
         return CHIMP_FALSE;
     }
 
+    /* did we see any freevars while processing this closure? */
+    ste = CHIMP_SYMTABLE_GET_CURRENT_ENTRY(self);
+    freevars = CHIMP_SYMTABLE_ENTRY(ste)->flags & CHIMP_SYM_FREE;
+
     if (!chimp_symtable_leave_scope (self)) {
         return CHIMP_FALSE;
+    }
+
+    /* if this closure has freevars, we need to mark outer closures with
+     * the same flag.
+     *
+     * we do this to ensure that closures making use of freevars cannot be
+     * used as arguments to the spawn() builtin.
+     */
+    if (freevars) {
+        ste = CHIMP_SYMTABLE_ENTRY(ste)->parent;
+        while (ste != NULL) {
+            if (CHIMP_SYMTABLE_ENTRY(ste)->flags & CHIMP_SYM_CLOSURE) {
+                if (CHIMP_SYMTABLE_ENTRY(ste)->flags & CHIMP_SYM_FREE) {
+                    /* we get to bail out early if the outer scope is already
+                     * been tagged as using freevars */
+                    break;
+                }
+                else {
+                    CHIMP_SYMTABLE_ENTRY(ste)->flags |= CHIMP_SYM_FREE;
+                }
+            }
+            ste = CHIMP_SYMTABLE_ENTRY(ste)->parent;
+        }
     }
 
     return CHIMP_TRUE;

@@ -1096,6 +1096,7 @@ chimp_compile_bytecode_method (ChimpCodeCompiler *c, ChimpRef *fn, ChimpRef *arg
     ChimpRef *method;
     ChimpRef *ste;
     size_t i;
+    int uses_freevars = 0;
 
     func_code = chimp_code_compiler_push_code_unit (c, fn);
     if (func_code == NULL) {
@@ -1104,6 +1105,9 @@ chimp_compile_bytecode_method (ChimpCodeCompiler *c, ChimpRef *fn, ChimpRef *arg
 
     ste = c->current_unit->ste;
     symbols = CHIMP_SYMTABLE_ENTRY(ste)->symbols;
+    if (CHIMP_SYMTABLE_ENTRY(ste)->flags & CHIMP_SYM_CLOSURE) {
+        uses_freevars = CHIMP_SYMTABLE_ENTRY(ste)->flags & CHIMP_SYM_FREE;
+    }
     for (i = 0; i < CHIMP_HASH_SIZE(symbols); i++) {
         ChimpRef *key = CHIMP_HASH(symbols)->keys[i];
         ChimpRef *value = CHIMP_HASH(symbols)->values[i];
@@ -1146,6 +1150,10 @@ chimp_compile_bytecode_method (ChimpCodeCompiler *c, ChimpRef *fn, ChimpRef *arg
     method = chimp_method_new_bytecode (mod, func_code);
     if (method == NULL) {
         return NULL;
+    }
+    /* it's important for spawn() to know about this */
+    if (uses_freevars) {
+        CHIMP_METHOD(method)->flags |= CHIMP_METHOD_FLAG_FREEVARS;
     }
 
     return method;
