@@ -4,6 +4,16 @@ use io;
 use os;
 use compiler;
 
+run_file f {
+  var task = spawn {
+    var file = recv();
+    var mod = compiler.compile(file);
+    mod.main([]);
+  };
+
+  task.send(f);
+}
+
 main argv {
   var testdir = argv[1];
   if testdir== nil {
@@ -11,8 +21,8 @@ main argv {
   }
 
   io.print("Starting Chimp Runner for " + testdir);
-  os.glob(testdir + "/*.chimp").each(fn { |f|
-    var mod = compiler.compile(f);
-    mod.main([]);
-  });
+  os.glob(testdir + "/*.chimp").each(run_file); #fn { |f|
+ #   var mod = compiler.compile(f);
+ #   mod.main([]);
+ # });
 }
