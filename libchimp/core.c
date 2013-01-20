@@ -18,6 +18,9 @@
 
 #include <ctype.h>
 
+// XXX - Windows compatibility?
+#include <unistd.h>
+
 #include "chimp/core.h"
 #include "chimp/gc.h"
 #include "chimp/object.h"
@@ -711,8 +714,13 @@ _chimp_module_make_path (const char *path)
     size_t len;
     ChimpRef *result = chimp_array_new ();
     
+    // We only add the current working directory if no paths were passed via the environment
     if (path == NULL) {
-        /* TODO generate default path */
+        char current_dir[FILENAME_MAX];
+        if (getcwd(current_dir, sizeof(current_dir))) {
+          ChimpRef *entry = chimp_str_new(current_dir, sizeof(current_dir));
+          chimp_array_push(result, entry);
+        }
         return result;
     }
 

@@ -421,6 +421,28 @@ _chimp_array_remove_at (ChimpRef *self, ChimpRef *args)
     return removed;
 }
 
+
+static ChimpRef *
+_chimp_array_slice(ChimpRef *self, ChimpRef *args)
+{
+    int64_t start;
+    int64_t end;
+    if (!chimp_method_parse_args (args, "II", &start, &end)) {
+        CHIMP_BUG("invalid parameters, expecting two numeric values");
+        return NULL;
+    }
+    // XXX - Better parameter validation?
+    // XXX - Negative positioning for slicing
+
+    ChimpRef *result = chimp_array_new_with_capacity (end - start);
+    int64_t i;
+    for (i = start; i < end; i++) {
+      ChimpRef *item = CHIMP_ARRAY_ITEM(self, (size_t) i);
+      chimp_array_push(result, item);
+    }
+    return result;
+}
+
 chimp_bool_t
 chimp_array_class_bootstrap (void)
 {
@@ -446,6 +468,7 @@ chimp_array_class_bootstrap (void)
     chimp_class_add_native_method (chimp_array_class, "join", _chimp_array_join);
     chimp_class_add_native_method (chimp_array_class, "remove", _chimp_array_remove);
     chimp_class_add_native_method (chimp_array_class, "remove_at", _chimp_array_remove_at);
+    chimp_class_add_native_method (chimp_array_class, "slice", _chimp_array_slice);
     return CHIMP_TRUE;
 }
 

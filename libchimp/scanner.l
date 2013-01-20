@@ -24,6 +24,11 @@
 /* enable bison location info */
 %option bison-locations
 
+%option bison-bridge
+
+/* reentrant scanner */
+%option reentrant
+
 /* prefer a fast scanner to a small one */
 %option full
 

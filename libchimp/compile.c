@@ -1972,9 +1972,10 @@ error:
     return NULL;
 }
 
-extern int yyparse(ChimpRef *filename, ChimpRef **mod);
-extern void yylex_destroy(void);
-extern FILE *yyin;
+extern int yyparse(void *scanner, ChimpRef *filename, ChimpRef **mod);
+extern void yylex_init (void **scanner);
+extern void yyset_in (FILE *stream, void *scanner);
+extern void yylex_destroy(void *scanner);
 
 static chimp_bool_t
 is_file (const char *filename, chimp_bool_t *result)
@@ -1998,6 +1999,8 @@ chimp_compile_file (ChimpRef *name, const char *filename)
     ChimpRef *filename_obj;
     ChimpRef *mod;
     chimp_bool_t isreg;
+    void *scanner;
+    FILE *input;
 
     if (!is_file (filename, &isreg)) {
         return NULL;
@@ -2008,18 +2011,20 @@ chimp_compile_file (ChimpRef *name, const char *filename)
         return NULL;
     }
 
-    yyin = fopen (filename, "r");
-    if (yyin == NULL) {
+    input = fopen (filename, "r");
+    if (input == NULL) {
         return NULL;
     }
     filename_obj = chimp_str_new (filename, strlen (filename));
     if (filename_obj == NULL) {
-        fclose (yyin);
+        fclose (input);
         return NULL;
     }
-    rc = yyparse(filename_obj, &mod);
-    fclose (yyin);
-    yylex_destroy ();
+    yylex_init (&scanner);
+    yyset_in (input, scanner);
+    rc = yyparse(scanner, filename_obj, &mod);
+    fclose (input);
+    yylex_destroy (scanner);
     if (rc == 0) {
         /* keep a ptr to main_mod on the stack so it doesn't get collected */
         if (name == NULL) {

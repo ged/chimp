@@ -1,0 +1,8 @@
+use os;
+use io;
+use compiler;
+
+main argv {
+  var hello = compiler.compile(os.dirname(__file__) + "/helloworld.chimp");
+  hello.main();
+}

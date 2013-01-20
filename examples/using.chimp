@@ -1,0 +1,8 @@
+#!/usr/local/bin/chimp
+
+use helloworld;
+
+# Must be run from the examples directory, or with CHIMP_PATH set!
+main argv {
+  helloworld.main();
+}

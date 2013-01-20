@@ -66,4 +66,9 @@ main argv {
     t.equals(items.remove_at(0), 2);
     t.equals(items.size(), 0);
   });
+
+  chimpunit.test("slice", fn { |t|
+    var items = [1, 2, 3, 4];
+    t.equals([2, 3], items.slice(1, 3));
+  });
 }
