@@ -23,22 +23,33 @@
 #include "chimp/vm.h"
 #include "chimp/compile.h"
 
+// XXX -- Hacky, but for now can't compile in multiple tasks at once.
+// Get around it by just locking on our runtime compiler.
+static pthread_mutex_t compiler_lock;
+
 ChimpRef *
 _chimp_compiler_compile (ChimpRef *self, ChimpRef *args)
 {
+    pthread_mutex_lock (&compiler_lock);
+
     ChimpRef *filename = CHIMP_ARRAY_ITEM(args, 0);
     ChimpRef *module = CHIMP_COMPILE_MODULE_FROM_FILE (NULL, CHIMP_STR_DATA(filename));
     if (module == NULL) {
         fprintf (stderr, "error: failed to compile %s\n", CHIMP_STR_DATA(filename));
-        return chimp_nil;
+        module = chimp_nil;
     }
 
+    pthread_mutex_unlock (&compiler_lock);
     return module;
 }
 
 ChimpRef *
 chimp_init_compiler_module (void)
 {
+    if (pthread_mutex_init (&compiler_lock, NULL) != 0) {
+      return NULL;
+    }
+
     ChimpRef *mod;
 
     mod = chimp_module_new_str ("compiler", NULL);
