@@ -27,17 +27,6 @@
 #include "chimp/array.h"
 #include "chimp/str.h"
 
-#define CHIMP_MODULE_INT_CONSTANT(mod, name, value) \
-    do { \
-        ChimpRef *temp = chimp_int_new (value); \
-        if (temp == NULL) { \
-            return NULL; \
-        } \
-        if (!chimp_module_add_local_str ((mod), (name), temp)) { \
-            return NULL; \
-        } \
-    } while (0)
-
 #define CHIMP_MODULE_ADD_CLASS(mod, name, klass) \
     do { \
         if ((klass) == NULL) { \

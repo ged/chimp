@@ -11,6 +11,12 @@ find_package (BISON REQUIRED)
 find_package (FLEX REQUIRED)
 find_package (Threads REQUIRED)
 
+option (WITH_SDL "Build the sdl module" off)
+
+if(WITH_SDL)
+find_package (SDL)
+endif()
+
 set (LIB_SEARCH_PATH
         ${LIBRTDIR}/lib
         /usr/local/lib64
@@ -134,8 +140,7 @@ add_custom_command (
 # ---- </TEST-DRIVER> ----
 #
 
-include_directories ("${CMAKE_CURRENT_BINARY_DIR}/libchimp/include" "${PROJECT_SOURCE_DIR}/libchimp/include")
-add_library (libchimp STATIC
+set (LIBCHIMP_SOURCES
   ${PARSER_C}
   libchimp/array.c
   ${AST_C}
@@ -169,12 +174,21 @@ add_library (libchimp STATIC
   libchimp/modules/os.c
   libchimp/modules/http/http.c
   libchimp/modules/http/http-parser-2.0/http_parser.c)
+
+set (LIBCHIMP_CFLAGS "-I${PROJECT_SOURCE_DIR}/libchimp/modules/http/http-parser-2.0")
+
+if(SDL_FOUND)
+    set (LIBCHIMP_SOURCES ${LIBCHIMP_SOURCES} libchimp/modules/sdl.c)
+    set (LIBCHIMP_CFLAGS "${LIBCHIMP_CFLAGS} -I${SDL_INCLUDE_DIR} -DCHIMP_WITH_SDL=1")
+endif()
+
+include_directories ("${CMAKE_CURRENT_BINARY_DIR}/libchimp/include" "${PROJECT_SOURCE_DIR}/libchimp/include")
+add_library (libchimp STATIC ${LIBCHIMP_SOURCES})
 #
 # Default behaviour is to generate liblibchimp.a ...
 #
 set_target_properties (libchimp PROPERTIES OUTPUT_NAME chimp)
-set_target_properties (libchimp PROPERTIES
-  COMPILE_FLAGS "-I${PROJECT_SOURCE_DIR}/libchimp/modules/http/http-parser-2.0")
+set_target_properties (libchimp PROPERTIES COMPILE_FLAGS ${LIBCHIMP_CFLAGS})
 
 set (CHIMP_LIBRARIES
     libchimp
@@ -184,6 +198,10 @@ set (CHIMP_LIBRARIES
     ${COREFOUNDATION_LIBRARY}
     ${CORESERVICES_LIBRARY}
     ${LIBRT_LIBRARIES})
+
+if(SDL_FOUND)
+    set (CHIMP_LIBRARIES ${CHIMP_LIBRARIES} ${SDL_LIBRARY})
+endif()
 
 add_executable (chimp main.c)
 target_link_libraries (chimp ${CHIMP_LIBRARIES})

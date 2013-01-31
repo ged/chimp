@@ -130,7 +130,7 @@ extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, void *scanner, ChimpRef *filena
 
 %%
 
-module : opt_uses opt_decls { *mod = chimp_ast_mod_new_root (CHIMP_STR_NEW("main"), $1, $2, &@$); }
+module : opt_newline opt_uses opt_decls { *mod = chimp_ast_mod_new_root (CHIMP_STR_NEW("main"), $2, $3, &@$); }
        ;
 
 opt_newline : TOK_NEWLINE

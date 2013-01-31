@@ -72,6 +72,17 @@ chimp_module_add_builtin (ChimpRef *module);
 #define CHIMP_MODULE_NAME(ref) (CHIMP_MODULE(ref)->name)
 #define CHIMP_MODULE_LOCALS(ref) (CHIMP_MODULE(ref)->locals)
 
+#define CHIMP_MODULE_INT_CONSTANT(mod, name, value) \
+    do { \
+        ChimpRef *temp = chimp_int_new (value); \
+        if (temp == NULL) { \
+            return NULL; \
+        } \
+        if (!chimp_module_add_local_str ((mod), (name), temp)) { \
+            return NULL; \
+        } \
+    } while (0)
+
 CHIMP_EXTERN_CLASS(module);
 
 #ifdef __cplusplus

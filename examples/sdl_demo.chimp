@@ -1,0 +1,31 @@
+use sdl
+use io
+
+event e {
+  if e.type == sdl.KEYUP {
+    if e.key == sdl.K_ESCAPE {
+      ret false
+    }
+  }
+  ret true
+}
+
+events {
+  while true {
+    match sdl.poll_event() {
+      nil { break }
+      e { ret event(e) }
+    }
+  }
+  ret true
+}
+
+main argv {
+  var screen = sdl.set_video_mode(800, 600, 0, sdl.DOUBLEBUF)
+  while true {
+    if not events() { break }
+    screen.fill(screen.color(255, 0, 0))
+    sdl.flip(screen)
+  }
+}
+

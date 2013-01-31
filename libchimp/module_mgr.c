@@ -146,6 +146,12 @@ _chimp_module_mgr_func (ChimpRef *self, ChimpRef *args)
         return CHIMP_FALSE;
     }
 
+#ifdef CHIMP_WITH_SDL
+    if (!_chimp_module_mgr_add_builtin (chimp_init_sdl_module ())) {
+        return CHIMP_FALSE;
+    }
+#endif
+
     if (!chimp_task_send (
             CHIMP_ARRAY_ITEM(args, 0), CHIMP_STR_NEW ("ready"))) {
         return NULL;

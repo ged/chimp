@@ -47,6 +47,11 @@ chimp_init_net_module (void);
 ChimpRef *
 chimp_init_http_module (void);
 
+#ifdef CHIMP_WITH_SDL
+ChimpRef *
+chimp_init_sdl_module (void);
+#endif
+
 #ifdef __cplusplus
 };
 #endif
